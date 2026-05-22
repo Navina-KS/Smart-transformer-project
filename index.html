@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smart Transformer Fault Detection System</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #060c1a;
+    --bg2: #0a1628;
+    --card: #0d1f3c;
+    --card2: #0f2545;
+    --accent: #00d4ff;
+    --accent2: #0077ff;
+    --accent3: #ff6b00;
+    --text: #e8f4ff;
+    --muted: #7a9bbf;
+    --red: #ff3b5c;
+    --green: #00ffaa;
+    --border: rgba(0,212,255,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATED GRID BG ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(6,12,26,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-logo::before {
+    content: '⚡';
+    font-size: 1.4rem;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    font-weight: 500;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ── HERO ── */
+  #hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 20px 60px;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(0,119,255,0.18) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 900px; }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    padding: 6px 18px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  h1.hero-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--accent) 60%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeUp 0.9s 0.1s ease both;
+  }
+
+  .hero-sub {
+    margin-top: 20px;
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+    animation: fadeUp 1s 0.2s ease both;
+  }
+
+  .hero-cta {
+    margin-top: 40px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 1s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: #000;
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 30px rgba(0,212,255,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0,212,255,0.5); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--accent);
+    font-weight: 600;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    padding: 14px 32px;
+    border: 1px solid rgba(0,212,255,0.4);
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-outline:hover { background: rgba(0,212,255,0.08); border-color: var(--accent); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+    padding: 40px 20px;
+    border-top: 1px solid var(--border);
+    background: rgba(13,31,60,0.5);
+  }
+
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  /* ── SECTIONS ── */
+  section { position: relative; z-index: 1; padding: 100px 40px; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h2.section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    max-width: 700px;
+  }
+
+  /* ── ABOUT ── */
+  #about {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+
+  .about-text { flex: 1; min-width: 280px; }
+
+  .about-visual {
+    flex: 1;
+    min-width: 280px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--accent);
+    line-height: 2;
+  }
+
+  .code-line { display: flex; align-items: center; gap: 12px; }
+  .code-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  .code-dot.red { background: var(--red); animation-delay: 0.3s; }
+  .code-dot.orange { background: var(--accent3); animation-delay: 0.6s; }
+  .code-dot.green { background: var(--green); animation-delay: 0.9s; }
+
+  /* ── PROBLEM/SOLUTION ── */
+  #problems {
+    background: var(--bg2);
+  }
+
+  .ps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    max-width: 1100px;
+    margin: 60px auto 0;
+  }
+
+  .ps-card {
+    border-radius: 16px;
+    padding: 40px;
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ps-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .ps-card.problem {
+    background: rgba(255,59,92,0.06);
+    border-color: rgba(255,59,92,0.2);
+  }
+  .ps-card.problem::before { background: linear-gradient(90deg, var(--red), transparent); }
+
+  .ps-card.solution {
+    background: rgba(0,255,170,0.05);
+    border-color: rgba(0,255,170,0.2);
+  }
+  .ps-card.solution::before { background: linear-gradient(90deg, var(--green), transparent); }
+
+  .ps-card h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+  }
+  .ps-card.problem h3 { color: var(--red); }
+  .ps-card.solution h3 { color: var(--green); }
+
+  .ps-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .ps-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .ps-list li::before {
+    content: '▸';
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+  .ps-card.problem .ps-list li::before { color: var(--red); }
+  .ps-card.solution .ps-list li::before { color: var(--green); }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 60px auto 0;
+  }
+
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 28px;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,212,255,0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover { transform: translateY(-6px); border-color: rgba(0,212,255,0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .feature-card:hover::after { opacity: 1; }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .feature-card h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    color: var(--accent);
+  }
+  .feature-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+
+  /* ── ARCHITECTURE ── */
+  #architecture { background: var(--bg2); }
+
+  .arch-flow {
+    max-width: 1000px;
+    margin: 60px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+
+  .arch-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-width: 110px;
+    text-align: center;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .arch-node:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+  .arch-node-icon { font-size: 1.8rem; }
+  .arch-node-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+  }
+
+  .arch-arrow {
+    color: var(--accent2);
+    font-size: 1.5rem;
+    padding: 0 4px;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  /* ── IMPACT ── */
+  .impact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1000px;
+    margin: 60px auto 0;
+  }
+
+  .impact-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+  }
+
+  .impact-card h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .impact-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .impact-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .impact-list li::before { content: '✦'; color: var(--accent3); font-size: 0.7rem; }
+
+  /* ── TEAM ── */
+  #team { background: var(--bg2); text-align: center; }
+
+  .team-box {
+    max-width: 700px;
+    margin: 40px auto 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px;
+  }
+
+  .team-box p { color: var(--muted); line-height: 1.9; font-size: 1.05rem; }
+
+  /* ── CONTACT ── */
+  #contact { text-align: center; }
+
+  .contact-cards {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 48px;
+  }
+
+  .contact-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 40px;
+    min-width: 240px;
+    transition: border-color 0.3s, transform 0.3s;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .contact-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .contact-card-icon { font-size: 2.4rem; }
+  .contact-card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .contact-card-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    word-break: break-all;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 40px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .footer-brand {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+
+  .footer-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .footer-badge {
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.25);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    section { padding: 70px 20px; }
+    .ps-grid, .impact-grid { grid-template-columns: 1fr; }
+    #about { flex-direction: column; gap: 40px; }
+    .arch-flow { flex-direction: column; }
+    .arch-arrow { transform: rotate(90deg); }
+    footer { flex-direction: column; text-align: center; }
+    .stats-bar { gap: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">STFDS</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#problems">Problem</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#impact">Impact</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">⚡ Niral Thiruvizha Innovation Challenge</div>
+    <h1 class="hero-title">Smart Transformer<br/>Fault Detection System</h1>
+    <p class="hero-sub">Real-Time IoT Monitoring for Reliable and Safer Power Distribution across Rural and Semi-Urban Networks</p>
+    <div class="hero-cta">
+      <a href="#about" class="btn-primary">Explore Innovation</a>
+      <a href="#contact" class="btn-outline">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-num" data-target="95">0%</span>
+    <span class="stat-label">Fault Detection Accuracy</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" data-target="24" data-suffix="/7">0</span>
+    <span class="stat-label">Continuous Monitoring</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" data-target="60" data-suffix="s">0</span>
+    <span class="stat-label">Alert Response Time</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" data-target="40" data-suffix="%">0</span>
+    <span class="stat-label">Cost Reduction</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section>
+  <div id="about">
+    <div class="about-text reveal">
+      <div class="section-label">// 01 — About</div>
+      <h2 class="section-title">Transforming Power Distribution Monitoring</h2>
+      <p class="section-desc">Our project tackles transformer failures and delayed fault detection in rural and semi-urban power distribution systems. Using IoT sensors, ESP32 microcontrollers, GSM alerts, relay protection, and cloud monitoring — we deliver real-time visibility and instant fault alerts to electricity board officials.</p>
+    </div>
+    <div class="about-visual reveal">
+      <div class="code-line"><div class="code-dot green"></div> System Status: <span style="color:var(--green)">ONLINE</span></div>
+      <div class="code-line" style="margin-top:10px"><div class="code-dot"></div> Voltage Monitor: <span style="color:var(--text)">230V AC</span></div>
+      <div class="code-line"><div class="code-dot orange"></div> Current Sensor: <span style="color:var(--text)">12.4A</span></div>
+      <div class="code-line"><div class="code-dot red"></div> Temperature: <span style="color:var(--accent3)">68°C</span></div>
+      <div class="code-line" style="margin-top:10px"><div class="code-dot green"></div> Relay Status: <span style="color:var(--green)">NORMAL</span></div>
+      <div class="code-line"><div class="code-dot green"></div> GSM Module: <span style="color:var(--green)">CONNECTED</span></div>
+      <div class="code-line"><div class="code-dot green"></div> Cloud Sync: <span style="color:var(--green)">ACTIVE</span></div>
+      <div style="margin-top:16px; color: var(--muted); font-size:0.72rem">Last Updated: <span id="live-time"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM / SOLUTION -->
+<section id="problems">
+  <div style="max-width:1100px;margin:0 auto;text-align:center" class="reveal">
+    <div class="section-label">// 02 — Problem & Solution</div>
+    <h2 class="section-title">Identifying the Gap, Delivering the Fix</h2>
+  </div>
+  <div class="ps-grid reveal">
+    <div class="ps-card problem">
+      <h3>⚠ Current Challenges</h3>
+      <ul class="ps-list">
+        <li>Frequent transformer failures across distribution networks</li>
+        <li>Delayed fault detection causing prolonged outages</li>
+        <li>Manual and inefficient monitoring methods</li>
+        <li>Unplanned power outages creating safety risks</li>
+        <li>High reactive maintenance costs</li>
+      </ul>
+    </div>
+    <div class="ps-card solution">
+      <h3>✓ Our Solution</h3>
+      <ul class="ps-list">
+        <li>Real-time IoT sensor-based monitoring 24/7</li>
+        <li>Automatic relay protection on fault detection</li>
+        <li>Instant SMS alerts to EB officials via GSM</li>
+        <li>Cloud-based dashboard for remote access</li>
+        <li>Affordable and scalable deployment model</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div style="max-width:1200px;margin:0 auto;text-align:center" class="reveal">
+    <div class="section-label">// 03 — Features</div>
+    <h2 class="section-title">Key Capabilities</h2>
+    <p class="section-desc" style="margin:0 auto;">Every component engineered for reliability, speed, and affordability.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <span class="feature-icon">🔍</span>
+      <h3>Real-Time Fault Detection</h3>
+      <p>Continuously monitors electrical parameters and triggers alerts within seconds of an anomaly — preventing cascading failures.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">📡</span>
+      <h3>IoT Sensor Monitoring</h3>
+      <p>Multi-parameter sensing including voltage, current, temperature, and oil level for comprehensive transformer health tracking.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">☁️</span>
+      <h3>Cloud Dashboard</h3>
+      <p>Remote access to live data, historical logs, and analytics through a secure cloud platform accessible anywhere, anytime.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">📱</span>
+      <h3>SMS Alert System</h3>
+      <p>GSM-powered instant SMS notifications dispatched to electricity board officials the moment a fault is detected.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">🔌</span>
+      <h3>Relay-Based Protection</h3>
+      <p>Automatic relay isolation activates on fault conditions — protecting equipment and preventing further damage autonomously.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">🌐</span>
+      <h3>Remote Monitoring</h3>
+      <p>Zero on-site presence needed for routine checks. Monitor entire transformer networks from a central operations center.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div style="max-width:1000px;margin:0 auto;text-align:center" class="reveal">
+    <div class="section-label">// 04 — Architecture</div>
+    <h2 class="section-title">System Architecture</h2>
+    <p class="section-desc" style="margin:0 auto;">A complete end-to-end pipeline from sensor to decision-maker.</p>
+  </div>
+  <div class="arch-flow reveal">
+    <div class="arch-node">
+      <div class="arch-node-icon">🔋</div>
+      <div class="arch-node-label">IoT<br/>Sensors</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="arch-node-icon">🧠</div>
+      <div class="arch-node-label">ESP32<br/>Controller</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="arch-node-icon">⚡</div>
+      <div class="arch-node-label">Relay<br/>Protection</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="arch-node-icon">📶</div>
+      <div class="arch-node-label">GSM<br/>Module</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="arch-node-icon">☁️</div>
+      <div class="arch-node-label">Cloud<br/>Platform</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="arch-node-icon">👷</div>
+      <div class="arch-node-label">EB<br/>Officials</div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section id="impact">
+  <div style="max-width:1000px;margin:0 auto;text-align:center" class="reveal">
+    <div class="section-label">// 05 — Impact</div>
+    <h2 class="section-title">Expected Impact</h2>
+  </div>
+  <div class="impact-grid reveal">
+    <div class="impact-card">
+      <h3>Operational Benefits</h3>
+      <ul class="impact-list">
+        <li>Reduced transformer failures significantly</li>
+        <li>Improved electricity reliability for communities</li>
+        <li>Faster maintenance response cycles</li>
+        <li>Enhanced public and infrastructure safety</li>
+      </ul>
+    </div>
+    <div class="impact-card">
+      <h3>Strategic Benefits</h3>
+      <ul class="impact-list">
+        <li>Reduced long-term maintenance costs by ~40%</li>
+        <li>Smart rural infrastructure enablement</li>
+        <li>Supports Digital India &amp; Smart Cities Mission</li>
+        <li>Scalable for large urban grid deployments</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team">
+  <div class="section-label reveal">// 06 — Team</div>
+  <h2 class="section-title reveal">Our Team</h2>
+  <div class="team-box reveal">
+    <p>A passionate student innovation team focused on building affordable and impactful smart energy solutions. We believe technology should serve everyone — including the last-mile communities who need reliable power the most.</p>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div style="max-width:800px;margin:0 auto" class="reveal">
+    <div class="section-label">// 07 — Contact</div>
+    <h2 class="section-title">Get In Touch</h2>
+    <p class="section-desc" style="margin:0 auto;">Reach out to us for collaboration, queries, or feedback.</p>
+  </div>
+  <div class="contact-cards reveal">
+    <a href="tel:+917010000000" class="contact-card">
+      <div class="contact-card-icon">📞</div>
+      <div class="contact-card-label">Phone</div>
+      <div class="contact-card-value">+91 98434 71596</div>
+    </a>
+    <a href="mailto:smarttransformer@gmail.com" class="contact-card">
+      <div class="contact-card-icon">✉️</div>
+      <div class="contact-card-label">Gmail</div>
+      <div class="contact-card-value">smarttransformer<br/>@gmail.com</div>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">⚡ STFDS</div>
+  <div class="footer-tag">Smart Transformer Fault Detection System &mdash; 2026</div>
+  <div class="footer-badge">Niral Thiruvizha ⚡</div>
+</footer>
+
+<script>
+  // Live time
+  function updateTime() {
+    const el = document.getElementById('live-time');
+    if (el) el.textContent = new Date().toLocaleTimeString();
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Counter animation
+  function animateCounter(el, target, suffix) {
+    let current = 0;
+    const duration = 1800;
+    const start = performance.now();
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      current = Math.floor(eased * target);
+      el.textContent = current + (suffix || '%');
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = target + (suffix || '%');
+    }
+    requestAnimationFrame(step);
+  }
+
+  const statsObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        document.querySelectorAll('[data-target]').forEach(el => {
+          const target = parseInt(el.dataset.target);
+          const suffix = el.dataset.suffix || '%';
+          animateCounter(el, target, suffix);
+        });
+        statsObs.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  const statsBar = document.querySelector('.stats-bar');
+  if (statsBar) statsObs.observe(statsBar);
+</script>
+</body>
+</html>
